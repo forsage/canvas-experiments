@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3D CUBES demo</title>
+    <link rel="stylesheet" href="css/cube.css">
+    <script type="text/javascript" src="js/cube.js"></script>
+</head>
+<body>
+<div id="screen">
+    <canvas id="canvas">HTML5 CANVAS</canvas>
+    <div id="info">
+        <div class="background"></div>
+        <div class="content">
+            <h1>3D Cubes</h1>
+            <table>
+                <tr>
+                    <td class="w">drag</td>
+                    <td>→ rotate X,Y axis</td>
+                </tr>
+                <tr>
+                    <td class="w">wheel</td>
+                    <td>→ rotate Z axis</td>
+                </tr>
+                <tr>
+                    <td class="w">click</td>
+                    <td>→ create cube</td>
+                </tr>
+            </table>
+            <hr>
+            <input type="checkbox" id="white"><label for="white"> white background</label><br>
+            <input type="checkbox" id="alpha"><label for="alpha"> transparency</label><br>
+            <input type="checkbox" id="autor"><label for="autor"> auto rotation</label><br>
+            <input type="checkbox" id="destroy"><label for="destroy"> destroy cubes</label><br>
+            <input type="checkbox" id="framesOnly"><label for="framesOnly"> frames only</label><br>
+            <input type="text" id="nStarEdges" maxlength="2" size="2"><label for="nStarEdges"> star edges</label><br>
+            <hr>
+            - <span id="fps" class="w">00</span> FPS<br>
+            - <span id="npoly" class="w">00</span> Faces<br>
+            - <span id="cangle" class="w">0,0,0</span> Camera Angle<br>
+            - <span id="cmove" class="w" style="display: none;">0,0</span> Camera Move<br>
+
+            <p align="center">
+                <input type="button" value="RESET" id="reset" class="button">
+                <input type="button" value="STOP" id="stopgo" class="button">
+            </p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
