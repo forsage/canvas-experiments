@@ -9,6 +9,7 @@
 
 (function () {
     // ======== private vars ========
+    // *** R: line length is too long and multiple var seems uneccessary
     var scr, canvas, cubes, faces, outlineCubes, outlineFaces, nx, ny, nw, nh, xm = 0, ym = 0, cx = 50, cy = 50, cz = 0, cxb = 0, cyb = 0;
     var white, alpha, fps = 0, ncube, npoly, faceOver, drag, moved, startX = 0, startY = 0;
     var cosY, sinY, cosX, sinX, cosZ, sinZ, minZ, angleY = 0, angleX = 0, angleZ = 0;
@@ -21,7 +22,10 @@
     var framesOnly = false;
     var nStarEdges = 7;
     // ======== canvas constructor ========
+    //*** R: you can write function Canvas() instead ... and why is it capital?
+    //*** R: would you create an object instead of function?
     var Canvas = function (id) {
+        // *** R: not obvious "this" -> who is this :)
         this.container = document.getElementById(id);
         this.ctx = this.container.getContext("2d");
         this.resize = function (w, h) {
@@ -30,6 +34,7 @@
         }
     };
     // ======== vertex constructor ========
+    // *** R: see Canvas
     var Point = function (parent, xyz, project) {
         this.project = project;
         this.xo = xyz[0];
@@ -80,6 +85,7 @@
     Face.prototype.pointerInside = function () {
         // ---- Is Point Inside Triangle? ----
         // http://2000clicks.com/mathhelp/GeometryPointAndTriangle2.aspx
+        // *** R: var not needed
         var fAB = function (p1, p2, p3) {
             return (ym - p1.Y) * (p2.X - p1.X) - (xm - p1.X) * (p2.Y - p1.Y);
         };
@@ -89,6 +95,7 @@
         var fBC = function (p1, p2, p3) {
             return (ym - p2.Y) * (p3.X - p2.X) - (xm - p2.X) * (p3.Y - p2.Y);
         };
+        // *** R : seems a bit complex + why do you need 2 independent if without else?
         if (
             fAB(this.p0, this.p1, this.p3) * fBC(this.p0, this.p1, this.p3) > 0 &&
             fBC(this.p0, this.p1, this.p3) * fCA(this.p0, this.p1, this.p3) > 0
@@ -130,12 +137,15 @@
         // ---- flat (lambert) shading ----
         this.normal.projection();
         var light = (
+                // *** R: you can use if then else instead of multiline elvis operator
                 white ?
                 this.normal.y + this.normal.z * 0.5 :
                     this.normal.z
             ) * 256;
         // ---- light ----
+        //*** R: you can refactor this if part into a function 
         if (this == faceOver) {
+            // *** R: you can declare r,g,b in the beginning of the function
             var r = 256;
             var g = 256;
             var b = 256;
@@ -161,6 +171,8 @@
                 var g = absLight;
                 var b = absLight;
             }
+            // *** R : slow and long references -> you can create a temp var for canvas.ctx
+            // *** R : where is canvas declared???
             canvas.ctx.beginPath();
             canvas.ctx.moveTo(this.p0.X, this.p0.Y);
             canvas.ctx.lineTo(this.p1.X, this.p1.Y);
@@ -290,6 +302,7 @@
     var Star = function (cx, cy, cz, spikes, outerRadius, parent, normalVector) {
         var innerRadius = this.calculateInnerRadius(spikes, outerRadius);
         var rot = Math.PI / 2 * 3;
+        // *** R: ??? I do not understand these:
         var x = cx;
         var y = cy;
         var z = cz;
@@ -624,6 +637,8 @@
     return {
         ////////////////////////////////////////////////////////////////////////////
         // ---- onload event ----
+        
+        /// *** R: :) ().load(); ... :) ?
         load: function () {
             window.addEventListener('load', function () {
                 init();
