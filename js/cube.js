@@ -9,19 +9,53 @@
 
 (function () {
     // ======== private vars ========
-    var scr, canvas, cubes, faces, outlineCubes, outlineFaces, nx, ny, nw, nh, xm = 0, ym = 0, cx = 50, cy = 50, cz = 0, cxb = 0, cyb = 0;
-    var white, alpha, fps = 0, ncube, npoly, faceOver, drag, moved, startX = 0, startY = 0;
-    var cosY, sinY, cosX, sinX, cosZ, sinZ, minZ, angleY = 0, angleX = 0, angleZ = 0;
+    var scr;
+    var canvas;
+    var cubes;
+    var faces;
+    var nx;
+    var ny;
+    var nw;
+    var nh;
+    var xm = 0;
+    var ym = 0;
+    var cx = 50;
+    var cy = 50;
+    var cz = 0;
+    var cxb = 0;
+    var cyb = 0;
+    var white;
+    var alpha;
+    var fps = 0;
+    var nCube;
+    var nPoly;
+    var faceOver;
+    var drag;
+    var moved;
+    var startX = 0;
+    var startY = 0;
+    var cosY;
+    var sinY;
+    var cosX;
+    var sinX;
+    var cosZ;
+    var sinZ;
+    var minZ;
+    var angleY = 0;
+    var angleX = 0;
+    var angleZ = 0;
     var bkgColor1 = "rgba(0,0,0,0.1)";
     var bkgColor2 = "rgba(32,32,32,1)";
-    var autorotate = false, destroy = false, running = true;
+    var autorotate = false;
+    var destroy = false;
+    var running = true;
     // ---- fov ----
     var fl = 250;
     var zoom = 0;
     var framesOnly = false;
     var nStarEdges = 7;
     // ======== canvas constructor ========
-    var Canvas = function (id) {
+    function Canvas(id) {
         this.container = document.getElementById(id);
         this.ctx = this.container.getContext("2d");
         this.resize = function (w, h) {
@@ -30,7 +64,7 @@
         }
     };
     // ======== vertex constructor ========
-    var Point = function (parent, xyz, project) {
+    function Point(parent, xyz, project) {
         this.project = project;
         this.xo = xyz[0];
         this.yo = xyz[1];
@@ -55,7 +89,7 @@
         }
     };
     // ======= polygon constructor ========
-    var Face = function (cube, index, normalVector, hasStar) {
+    function Face(cube, index, normalVector, hasStar) {
         // ---- parent cube ----
         this.cube = cube;
         // ---- coordinates ----
@@ -73,9 +107,9 @@
             this.star = new Star(xoAvg, yoAvg, zoAvg, nStarEdges, 30, cube, normalVector);
         }
         // ---- # faces ----
-        this.ixFace = npoly % 6;
-        npoly++;
-        document.getElementById('npoly').innerHTML = npoly;
+        this.ixFace = nPoly % 6;
+        nPoly++;
+        document.getElementById('npoly').innerHTML = nPoly;
     };
     Face.prototype.pointerInside = function () {
         // ---- Is Point Inside Triangle? ----
@@ -92,11 +126,15 @@
         if (
             fAB(this.p0, this.p1, this.p3) * fBC(this.p0, this.p1, this.p3) > 0 &&
             fBC(this.p0, this.p1, this.p3) * fCA(this.p0, this.p1, this.p3) > 0
-        ) return true;
+        ) {
+            return true;
+        }
         if (
             fAB(this.p1, this.p2, this.p3) * fBC(this.p1, this.p2, this.p3) > 0 &&
             fBC(this.p1, this.p2, this.p3) * fCA(this.p1, this.p2, this.p3) > 0
-        ) return true;
+        ) {
+            return true;
+        }
         // ----
         return false;
     };
@@ -129,37 +167,44 @@
     Face.prototype.draw = function () {
         // ---- flat (lambert) shading ----
         this.normal.projection();
-        var light = (
-                white ?
-                this.normal.y + this.normal.z * 0.5 :
-                    this.normal.z
-            ) * 256;
+        var light = calculateLight.call(this);
+
+        function calculateLight() {
+            if (white) {
+                return (this.normal.y + this.normal.z * 0.5) * 256;
+            }
+
+            return this.normal.z * 256;
+        }
         // ---- light ----
+        var r = 256;
+        var g = 256;
+        var b = 256;
         if (this == faceOver) {
-            var r = 256;
-            var g = 256;
-            var b = 256;
+            r = 256;
+            g = 256;
+            b = 256;
         } else {
             if (Math.abs(this.normal.xo) == 1) {
-                var r = light;
-                var g = b = 0;
+                r = light;
+                g = b = 0;
             }
             if (Math.abs(this.normal.yo) == 1) {
-                var g = light;
-                var r = b = 0;
+                g = light;
+                r = b = 0;
             }
             if (Math.abs(this.normal.zo) == 1) {
-                var b = light;
-                var r = g = 0;
+                b = light;
+                r = g = 0;
             }
         }
         // ---- shape face ----
         if (framesOnly) {
             if (this != faceOver) {
                 var absLight = Math.abs(Math.round(light));
-                var r = absLight;
-                var g = absLight;
-                var b = absLight;
+                r = absLight;
+                g = absLight;
+                b = absLight;
             }
             canvas.ctx.beginPath();
             canvas.ctx.moveTo(this.p0.X, this.p0.Y);
@@ -197,7 +242,7 @@
         canvas.ctx.closePath();
     };
     // ======== Cube constructor ========
-    var Cube = function (parent, nx, ny, nz, x, y, z, w) {
+    function Cube(parent, nx, ny, nz, x, y, z, w) {
         if (parent) {
             // ---- translate parent points ----
             this.w = parent.w;
@@ -256,7 +301,7 @@
                 new Face(this, f[i], nv[i], true)
             );
         }
-        ncube++;
+        nCube++;
     };
     var shuffleCoordinates = function (xyz, normalVector, cxcycz) {
         var x = xyz[0];
@@ -287,12 +332,12 @@
         return shuffled;
     };
     // ======== Star constructor ========
-    var Star = function (cx, cy, cz, spikes, outerRadius, parent, normalVector) {
+    function Star(cx, cy, cz, spikes, outerRadius, parent, normalVector) {
         var innerRadius = this.calculateInnerRadius(spikes, outerRadius);
         var rot = Math.PI / 2 * 3;
-        var x = cx;
-        var y = cy;
-        var z = cz;
+        var edgeX = cx;
+        var edgeY = cy;
+        var edgeZ = cz;
         var step = Math.PI / spikes;
 
         this.points = [];
@@ -301,21 +346,21 @@
         this.points.push(pointStart);
         parent.points.push(pointStart)
         for (var ixSpike = 0; ixSpike < spikes; ixSpike++) {
-            x = cx + Math.cos(rot) * outerRadius;
-            y = cy + Math.sin(rot) * outerRadius;
-            var pointOuter = new Point(parent, shuffleCoordinates([x, y, z], normalVector, [cx, cy, cz]), true);
+            edgeX = cx + Math.cos(rot) * outerRadius;
+            edgeY = cy + Math.sin(rot) * outerRadius;
+            var pointOuter = new Point(parent, shuffleCoordinates([edgeX, edgeY, edgeZ], normalVector, [cx, cy, cz]), true);
             this.points.push(pointOuter);
             parent.points.push(pointOuter);
             rot += step
 
-            x = cx + Math.cos(rot) * innerRadius;
-            y = cy + Math.sin(rot) * innerRadius;
-            var pointInner = new Point(parent, shuffleCoordinates([x, y, z], normalVector, [cx, cy, cz]), true);
+            edgeX = cx + Math.cos(rot) * innerRadius;
+            edgeY = cy + Math.sin(rot) * innerRadius;
+            var pointInner = new Point(parent, shuffleCoordinates([edgeX, edgeY, edgeZ], normalVector, [cx, cy, cz]), true);
             this.points.push(pointInner);
             parent.points.push(pointInner);
             rot += step
         }
-        var pointEnd = new Point(parent, shuffleCoordinates([cx, cy - outerRadius, z], normalVector, [cx, cy, cz]), true);
+        var pointEnd = new Point(parent, shuffleCoordinates([cx, cy - outerRadius, edgeZ], normalVector, [cx, cy, cz]), true);
         this.points.push(pointEnd);
         parent.points.push(pointEnd);
     };
@@ -355,10 +400,8 @@
         // ---- remove every cube ----
         cubes = [];
         faces = [];
-        outlineCubes = [];
-        outlineFaces = [];
-        ncube = 0;
-        npoly = 0;
+        nCube = 0;
+        nPoly = 0;
         nStarEdges = 7;
         document.getElementById("framesOnly").checked = framesOnly = false;
         document.getElementById("nStarEdges").value = 7;
@@ -384,7 +427,7 @@
         detectFaceOver();
         if (faceOver) {
             if (destroy) {
-                if (ncube > 1) {
+                if (nCube > 1) {
                     var c = faceOver.cube;
                     faceOver.clicked = false;
                     // ---- destroy faces ----
@@ -392,16 +435,16 @@
                     while (f = faces[i++]) {
                         if (f.cube == c) {
                             faces.splice(--i, 1);
-                            npoly--;
+                            nPoly--;
                         }
                     }
-                    document.getElementById('npoly').innerHTML = npoly;
+                    document.getElementById('npoly').innerHTML = nPoly;
                     // ---- destroy cube ----
                     var i = 0, o;
                     while (o = cubes[i++]) {
                         if (o == c) {
                             cubes.splice(--i, 1);
-                            ncube--;
+                            nCube--;
                             break;
                         }
                     }
